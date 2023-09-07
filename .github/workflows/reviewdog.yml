@@ -1,0 +1,105 @@
+name: reviewdog
+on: [pull_request]
+jobs:
+  pylint:
+    name: runner / pylint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+      - name: "run"
+        run: |
+          sudo apt install tree;
+          python -m pip install --upgrade pip;
+          pip install pylint-quotes;
+          tree
+
+      - uses: wuisky/action-pylint@wu-debug
+        with:
+          github_token: ${{ secrets.github_token }}
+          # Change reviewdog reporter if you need [github-pr-check,github-check,github-pr-review].
+          reporter: github-pr-review
+          # Change reporter level if you need.
+          # GitHub Status Check won't become failure with warning.
+          level: error
+          fail_on_error: true
+          # pylint_rc: ./rp_style/pylintrc
+          pylint_rc: ".pylintrc"
+          pylint_args: --reports=no
+          glob_pattern: "**/*.py"
+          filter_mode: nofilter
+
+  # clang-format:
+  #   name: runner / clang-format
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     #- uses: reviewdog/action-setup@v1
+  #     #  with:
+  #     #    reviewdog_version: latest
+  #     - uses: hsnuhayato/clang-format-lint-action@add_review_dog
+  #       #env:
+  #       #  REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.github_token }}
+  #       with:
+  #         source: './cpp_src'
+  #         extensions: 'h,cpp'
+  #         clangFormatVersion: 10
+  #         github_token: ${{ secrets.github_token }}
+  #         reporter: github-pr-review
+  #         level: error
+  #         fail_on_error: true
+  #         filter_mode: nofilter
+
+  # yapf-format:
+  #   name: runner / yapf-format
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: hsnuhayato/yapf-action@add_review_dog
+  #       with:
+  #         args: "--verbose --style='{based_on_style: google, column_limit: 100, indent_width: 4}'"
+  #         github_token: ${{ secrets.github_token }}
+  #         reporter: github-pr-review
+  #         level: error
+  #         fail_on_error: true
+  #         filter_mode: nofilter
+
+  # mypy:
+  #   name: runner / mypy
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: tsuyoshicho/action-mypy@v3.11.0
+  #       with:
+  #         target: './script'
+  #         mypy_flags: "--check-untyped-defs  --ignore-missing-imports"
+  #         github_token: ${{ secrets.github_token }}
+  #         reporter: github-pr-review
+  #         level: error
+  #         fail_on_error: true
+  #         filter_mode: nofilter
+
+
+      # - uses: reviewdog/action-cpplint@master
+      #   with:
+      #     github_token: ${{ secrets.github_token }}
+      #     reporter: github-pr-review
+      #     # flags: --linelength=50 # Optional
+      #     # targets: '--recursive ./cpp_src'
+
+      # - uses: actions/setup-python@v1
+      #   with:
+      #     python-version: 3.8
+      # - name: "run"
+      #   run: |
+      #     python -m pip install --upgrade pip;
+      #     pip install pylint;pip install pylint-quotes;
+      #     pylint --rcfile=./.pylintrc script/*.py
+
+
+      # - name: Debug
+      #   if: ${{ always() }}
+      #   uses: mxschmitt/action-tmate@v3
